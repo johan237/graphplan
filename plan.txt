@@ -4,4 +4,24 @@
 
 PLAN :
 
+func extract_solution(goals):
+    if find goals in state:
+        check(...goals are non mutex)
+        for prev_action_states[goal]
+        goals1_actions = a1-g1, a2-g2, a3-g3......
+        goals2_actions = a2-g1, a2-g2.......
 
+        doable_actions_pairs = [(g1a1,g2a1),(g1a1,g2a2),(g1a2,g2a1),(g1a2,g2a1)]
+
+        for all pair in doable_actions_pairs
+
+            if(mutex(pair))
+                return false
+
+            return new_goals = state_from(pair)
+
+    return extract solution(new_goals)
+
+
+    while not mutex:
+        select prev_goals

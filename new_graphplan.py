@@ -14,15 +14,41 @@ initial_states = {
     "at_not":[]
 }
 
-# def check_goals():
-#     for goal in self.goals:
-#         found = False
-#         for state in self.graph[self.level]:
-#             if goal == state:
-#                 found = True
-#         if not found:
-#             return False
-#     return True
+action_state = {
+    0:{ 
+        "load": {
+                 "preconds":{
+                     "at":["id_1","id_2"],
+                 },
+                 "effects":{
+                     "at_not":["id_1","id_2","id_3"],
+                     "in":["id_1"]
+                 }
+                 },
+        "unload": {
+                 "preconds":{
+                     "at":["id_1","id_2"],
+                     "in":["id_2"]
+                 },
+                 "effects":{
+                     "at":["id_1","id_2","id_3"],
+                     "in_not":["id_1"]
+                 }
+                 },
+        "move": {
+                 "preconds":{
+                     "at":["id_1","id_2"],
+                     "has_fuel":["id_2"]
+                 },
+                 "effects":{
+                     "at":["id_1","id_2","id_3"],
+                     "has_fuel_not":["id_1"],
+                     "at_not":["id_1"]
+                 }
+                 }    
+    }
+}
+
 
 def generate_pairs(array):
     pairs = []
@@ -80,34 +106,46 @@ class Graphplan:
             
             self.level = self.level+1
             self.graph[self.level] = current_state
+    
+    def extract_solution(self):
+        return 0
 
 
+def append_if_not_in(where_to_append, element):
+    try:
+        index = where_to_append.index(element)
+        return index
+    except ValueError:  # item not found in the list
+        where_to_append.append(item)
+        return len(where_to_append) - 1
+    
 
 def load(a_cargo, a_rocket, a_place):
     if(not is_in_place(a_cargo, a_place) or not is_in_place(a_rocket, a_place)):
         return False, None
-    current_state["in"].append((a_cargo, a_rocket))
-    current_state["at_not"].append((a_cargo, a_place))
+    append_if_not(current_state["in"],(a_cargo, a_rocket))
+    append_if_not(current_state["at_not"],(a_cargo, a_place))
+    # TODO: retrieve indices and put inside state action pair
     return True, (a_cargo, a_place)
+
 
 def unload(a_cargo, a_rocket, a_place):
     if(not is_in_place(a_rocket,a_place)):
         return False, None
     if(not cargo_is_in_rocket(a_cargo, a_rocket)):
         return False, None
-    current_state["at"].append((a_cargo, a_place))
-    current_state["in_not"].append((a_cargo, a_rocket))
-    
+    append_if_not(current_state["at"],(a_cargo, a_place))
+    append_if_not(current_state["in_not"],(a_cargo, a_rocket))
     
 def move( a_rocket,from_place, to_place):
     if( not has_fuel(a_rocket)):
         return False, None
     if( not is_in_place(a_rocket, from_place)):
         return False, None
-    current_state["at"].append((a_rocket, to_place))
-    
-    current_state["at_not"].append((a_rocket, from_place))
-    current_state["has_fuel_not"].append(a_rocket)
+
+    append_if_not(current_state["at"],(a_rocket, to_place))
+    append_if_not(current_state["at_not"],(a_rocket, from_place))
+    append_if_not(current_state["has_fuel_not"],a_rocket)
 
 
 
@@ -116,8 +154,6 @@ actions = {
     "unload": unload,
     "move":move
 }
-
-# print(actions['loading']())
 
 def has_fuel(a_plane):
     for plane in initial_states["has_fuel"]:
